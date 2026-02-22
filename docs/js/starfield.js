@@ -2,7 +2,7 @@
   'use strict';
   const canvas = document.getElementById('starfield');
   const ctx    = canvas.getContext('2d');
-  const NUM   = 100;   
+  const NUM   = 200;   
   const MAX_Z = 600;   
   const SPEED = 0.5;   
   let W, H, cx, cy;
@@ -18,15 +18,15 @@
       sy: (y / z) * H + cy,
     };
   }
-  function newStar(spreadZ) {
-    const z = spreadZ ? Math.random() * MAX_Z + 1 : MAX_Z;
+  function newStar() {
+    const z = Math.random() * MAX_Z + 1;
     return {
       x: (Math.random() - 0.5) * z,
       y: (Math.random() - 0.5) * z,
       z,
     };
   }
-  const stars = Array.from({ length: NUM }, () => newStar(true));
+  const stars = Array.from({ length: NUM }, () => newStar());
   function frame() {
     ctx.shadowBlur = 0;
     ctx.clearRect(0, 0, W, H);
@@ -34,17 +34,17 @@
       const s = stars[i];
       s.z -= SPEED;
       if (s.z <= 1) {
-        stars[i] = newStar(false);
+        stars[i] = newStar();
         continue;
       }
       const { sx, sy } = project(s.x, s.y, s.z);
       if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) {
-        stars[i] = newStar(false);
+        stars[i] = newStar();
         continue;
       }
       const t      = 1 - s.z / MAX_Z;
       const alpha  = Math.min(1, t * 2);
-      const radius = Math.max(0.2, t * t * 2.5);
+      const radius = Math.max(0.3, t * t * 2.5);
       const glow   = t * t * 18;
       ctx.shadowBlur  = glow;
       ctx.shadowColor = `rgba(180, 220, 255, ${alpha})`;
