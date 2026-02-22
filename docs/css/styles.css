@@ -51,7 +51,7 @@ body {
 }
 
 
-#btn-arume {
+#btn-game {
   order: 2;
   margin-top: 20px;
   padding: 12px 36px;
@@ -65,7 +65,7 @@ body {
   text-decoration: none;
 }
 
-#btn-arume:hover {
+#btn-game:hover {
   background: aquamarine;
   color: #1b2949;
 }
