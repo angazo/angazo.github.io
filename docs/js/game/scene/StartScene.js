@@ -2,37 +2,59 @@ class StartScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBackgroundColor('#000000');
     this._isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
-    this._createCloseButton();
     this.scale.on('resize', (gameSize) => {
-      this._repositionCloseButton(gameSize.width);
+      if (this._tapText)  this._centerTapText(gameSize.width, gameSize.height);
+      if (this._btnBg)    this._repositionCloseButton(gameSize.width);
     });
     if (this._isMobile) {
-      this.input.once('pointerdown', () => this._enterFullscreenLandscape());
+      this._showTapToStart();
+    } else {
+      this._createCloseButton();
     }
   }
-  _enterFullscreenLandscape() {
-    document.addEventListener('fullscreenchange', () => {
-      if (document.fullscreenElement) {
-        try {
-          screen.orientation.lock('landscape').catch(() => {});
-        } catch (e) {}
-      }
-    }, { once: true });
-    document.addEventListener('webkitfullscreenchange', () => {
-      const fs = document.fullscreenElement || document.webkitFullscreenElement;
-      if (fs) {
-        try {
-          screen.orientation.lock('landscape').catch(() => {});
-        } catch (e) {}
-      }
-    }, { once: true });
-    if (!this.scale.isFullscreen) {
-      this.scale.startFullscreen();
+  _showTapToStart() {
+    const { width, height } = this.scale;
+    this._tapText = this.add.text(0, 0, 'TOCA PARA JUGAR', {
+      fontSize: '26px',
+      color: '#ffffff',
+      fontFamily: 'courier, sans-serif',
+      align: 'center'
+    }).setOrigin(0.5).setDepth(5);
+    this._centerTapText(width, height);
+    this.tweens.add({
+      targets: this._tapText,
+      alpha: 0,
+      duration: 600,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1
+    });
+    this.input.once('pointerdown', () => this._enterFullscreen());
+  }
+  _centerTapText(w, h) {
+    this._tapText.setPosition(w / 2, h / 2);
+  }
+  _enterFullscreen() {
+    if (this._tapText) {
+      this._tapText.destroy();
+      this._tapText = null;
     }
+    const onFullscreen = () => {
+      const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+      if (fsElement) {
+        try {
+          screen.orientation.lock('landscape').catch(() => {});
+        } catch (e) {}
+        this._createCloseButton();
+      }
+    };
+    document.addEventListener('fullscreenchange',       onFullscreen, { once: true });
+    document.addEventListener('webkitfullscreenchange', onFullscreen, { once: true });
+    this.scale.startFullscreen();
   }
   _createCloseButton() {
     const { width } = this.scale;
-    this._btnR = 22;
+    this._btnR      = 22;
     this._btnMargin = 20;
     this._btnBg = this.add.graphics().setDepth(10);
     this._btnLabel = this.add.text(0, 0, '✕', {
@@ -43,11 +65,10 @@ class StartScene extends Phaser.Scene {
     this._btnLabel.on('pointerover', () => this._drawBtn(true));
     this._btnLabel.on('pointerout',  () => this._drawBtn(false));
     this._btnLabel.on('pointerup',   () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen().finally(() => { window.location.href = 'index.html'; });
-      } else {
-        window.location.href = 'index.html';
-      }
+      const exit = document.exitFullscreen
+        ? document.exitFullscreen()
+        : (document.webkitExitFullscreen ? Promise.resolve(document.webkitExitFullscreen()) : Promise.resolve());
+      exit.finally(() => { window.location.href = 'index.html'; });
     });
     this._repositionCloseButton(width);
   }
