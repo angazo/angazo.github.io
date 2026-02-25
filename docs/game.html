@@ -1,69 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <style>
-    * { margin: 0; padding: 0; }
-    body { overflow: hidden; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #000; }
   </style>
   <script src="js/3rd/phaser-arcade-physics.min.js"></script>
 </head>
 <body>
 
 <script>
-  class Example extends Phaser.Scene
-  {
-    preload ()
-    {
-      this.load.image('sky', 'assets/space.png');
-      this.load.image('logo', 'assets/logo.png');
-      this.load.image('red', 'assets/red.png');
-    }
+  class GameScene extends Phaser.Scene {
 
-    create ()
-    {
-      const { width, height } = this.scale;
+    create() {
+      this.cameras.main.setBackgroundColor('#000000');
+      this._createCloseButton();
 
-      this.sky = this.add.image(width / 2, height / 2, 'sky');
-      this.fitSky();
-
-      const particles = this.add.particles(0, 0, 'red', {
-        speed: 100,
-        scale: { start: 1, end: 0 },
-        blendMode: 'ADD'
+      this.scale.on('resize', (gameSize) => {
+        this._repositionCloseButton(gameSize.width, gameSize.height);
       });
 
-      const logo = this.physics.add.image(width / 2, 100, 'logo');
-
-      logo.setVelocity(100, 200);
-      logo.setBounce(1, 1);
-      logo.setCollideWorldBounds(true);
-
-      particles.startFollow(logo);
-
-      this.scale.on('resize', this.fitSky, this);
+      // Solicitar pantalla completa en móvil
+      if (this.sys.game.device.os.android || this.sys.game.device.os.iOS) {
+        this.time.delayedCall(300, () => {
+          if (this.scale.isFullscreen === false) {
+            this.scale.startFullscreen();
+          }
+        });
+      }
     }
 
-    fitSky ()
-    {
+    _createCloseButton() {
       const { width, height } = this.scale;
-      this.sky.setPosition(width / 2, height / 2);
-      this.sky.setDisplaySize(width, height);
+      const r = 22;
+      const margin = 20;
+
+      this._btnBg = this.add.graphics().setDepth(10);
+      this._btnLabel = this.add.text(0, 0, '✕', {
+        fontSize: '20px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif'
+      }).setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true });
+
+      this._btnLabel.on('pointerover', () => this._drawBtn(true));
+      this._btnLabel.on('pointerout',  () => this._drawBtn(false));
+      this._btnLabel.on('pointerup',   () => { window.location.href = 'index.html'; });
+
+      this._btnR = r;
+      this._btnMargin = margin;
+      this._repositionCloseButton(width, height);
+    }
+
+    _repositionCloseButton(w) {
+      const r = this._btnR;
+      const m = this._btnMargin;
+      const cx = w - m - r;
+      const cy = m + r;
+
+      this._btnX = cx;
+      this._btnY = cy;
+      this._drawBtn(false);
+      this._btnLabel.setPosition(cx, cy);
+    }
+
+    _drawBtn(hover) {
+      this._btnBg.clear();
+      this._btnBg.fillStyle(hover ? 0x555555 : 0x222222, 0.85);
+      this._btnBg.fillCircle(this._btnX, this._btnY, this._btnR);
     }
   }
 
   const config = {
     type: Phaser.AUTO,
+    backgroundColor: '#000000',
     scale: {
       mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    scene: Example,
-    physics: {
-      default: 'arcade',
-      arcade: {
-        gravity: { y: 200 }
-      }
-    }
+    scene: GameScene
   };
 
   const game = new Phaser.Game(config);
