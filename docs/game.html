@@ -10,70 +10,11 @@
     body { overflow: hidden; background: #000; }
   </style>
   <script src="js/3rd/phaser-arcade-physics.min.js"></script>
+  <script src="js/game/scene/StartScene.js"></script>
 </head>
 <body>
 
 <script>
-  class GameScene extends Phaser.Scene {
-
-    create() {
-      this.cameras.main.setBackgroundColor('#000000');
-      this._createCloseButton();
-
-      this.scale.on('resize', (gameSize) => {
-        this._repositionCloseButton(gameSize.width, gameSize.height);
-      });
-
-      // Solicitar pantalla completa en móvil
-      if (this.sys.game.device.os.android || this.sys.game.device.os.iOS) {
-        this.time.delayedCall(300, () => {
-          if (this.scale.isFullscreen === false) {
-            this.scale.startFullscreen();
-          }
-        });
-      }
-    }
-
-    _createCloseButton() {
-      const { width, height } = this.scale;
-      const r = 22;
-      const margin = 20;
-
-      this._btnBg = this.add.graphics().setDepth(10);
-      this._btnLabel = this.add.text(0, 0, '✕', {
-        fontSize: '20px',
-        color: '#ffffff',
-        fontFamily: 'Arial, sans-serif'
-      }).setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true });
-
-      this._btnLabel.on('pointerover', () => this._drawBtn(true));
-      this._btnLabel.on('pointerout',  () => this._drawBtn(false));
-      this._btnLabel.on('pointerup',   () => { window.location.href = 'index.html'; });
-
-      this._btnR = r;
-      this._btnMargin = margin;
-      this._repositionCloseButton(width, height);
-    }
-
-    _repositionCloseButton(w) {
-      const r = this._btnR;
-      const m = this._btnMargin;
-      const cx = w - m - r;
-      const cy = m + r;
-
-      this._btnX = cx;
-      this._btnY = cy;
-      this._drawBtn(false);
-      this._btnLabel.setPosition(cx, cy);
-    }
-
-    _drawBtn(hover) {
-      this._btnBg.clear();
-      this._btnBg.fillStyle(hover ? 0x555555 : 0x222222, 0.85);
-      this._btnBg.fillCircle(this._btnX, this._btnY, this._btnR);
-    }
-  }
-
   const config = {
     type: Phaser.AUTO,
     backgroundColor: '#000000',
@@ -81,7 +22,7 @@
       mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    scene: GameScene
+    scene: StartScene
   };
 
   const game = new Phaser.Game(config);
