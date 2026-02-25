@@ -39,18 +39,23 @@ class StartScene extends Phaser.Scene {
       this._tapText.destroy();
       this._tapText = null;
     }
-    const onFullscreen = () => {
-      const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
-      if (fsElement) {
-        try {
-          screen.orientation.lock('landscape').catch(() => {});
-        } catch (e) {}
-        this._createCloseButton();
-      }
+    const afterFullscreen = () => {
+      try {
+        screen.orientation.lock('landscape').catch(() => {});
+      } catch (e) {}
+      this._createCloseButton();
     };
-    document.addEventListener('fullscreenchange',       onFullscreen, { once: true });
-    document.addEventListener('webkitfullscreenchange', onFullscreen, { once: true });
-    this.scale.startFullscreen();
+    const el = document.documentElement;
+    const requestFS = el.requestFullscreen
+      || el.webkitRequestFullscreen
+      || el.mozRequestFullScreen;
+    if (requestFS) {
+      requestFS.call(el)
+        .then(() => afterFullscreen())
+        .catch(() => afterFullscreen()); 
+    } else {
+      afterFullscreen();
+    }
   }
   _createCloseButton() {
     const { width } = this.scale;
