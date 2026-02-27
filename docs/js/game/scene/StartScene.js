@@ -26,7 +26,13 @@ class StartScene extends Phaser.Scene {
       yoyo: true,
       repeat: -1
     });
-    document.addEventListener('click', () => this._enterFullscreen(), { once: true });
+    const trigger = () => {
+      document.removeEventListener('touchend', trigger);
+      document.removeEventListener('click', trigger);
+      this._enterFullscreen();
+    };
+    document.addEventListener('touchend', trigger);
+    document.addEventListener('click', trigger);
   }
   _centerTapText(w, h) {
     this._tapText.setPosition(w / 2, h / 2);
