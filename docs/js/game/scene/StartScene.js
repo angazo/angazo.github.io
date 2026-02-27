@@ -6,15 +6,12 @@ class StartScene extends Phaser.Scene {
       if (this._tapText)  this._centerTapText(gameSize.width, gameSize.height);
       if (this._btnBg)    this._repositionCloseButton(gameSize.width);
     });
-    if (this._isMobile) {
-      this._showTapToStart();
-    } else {
-      this._createCloseButton();
-    }
+    this._showTapToStart();
   }
   _showTapToStart() {
     const { width, height } = this.scale;
-    this._tapText = this.add.text(0, 0, 'TOCA PARA JUGAR', {
+    const label = this._isMobile ? 'TOCA PARA JUGAR' : 'CLICK PARA JUGAR';
+    this._tapText = this.add.text(0, 0, label, {
       fontSize: '26px',
       color: '#ffffff',
       fontFamily: 'courier, sans-serif',
@@ -29,7 +26,7 @@ class StartScene extends Phaser.Scene {
       yoyo: true,
       repeat: -1
     });
-    this.input.once('pointerdown', () => this._enterFullscreen());
+    document.addEventListener('click', () => this._enterFullscreen(), { once: true });
   }
   _centerTapText(w, h) {
     this._tapText.setPosition(w / 2, h / 2);
@@ -40,9 +37,11 @@ class StartScene extends Phaser.Scene {
       this._tapText = null;
     }
     const afterFullscreen = () => {
-      try {
-        screen.orientation.lock('landscape').catch(() => {});
-      } catch (e) {}
+      if (this._isMobile) {
+        try {
+          screen.orientation.lock('landscape').catch(() => {});
+        } catch (e) {}
+      }
       this._createCloseButton();
     };
     const el = document.documentElement;
@@ -52,7 +51,7 @@ class StartScene extends Phaser.Scene {
     if (requestFS) {
       requestFS.call(el)
         .then(() => afterFullscreen())
-        .catch(() => afterFullscreen()); 
+        .catch(() => afterFullscreen());
     } else {
       afterFullscreen();
     }
