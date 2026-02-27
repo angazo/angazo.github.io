@@ -48,7 +48,10 @@ class StartScene extends Phaser.Scene {
           screen.orientation.lock('landscape').catch(() => {});
         } catch (e) {}
       }
-      this._createCloseButton();
+      window.setTimeout(() => {
+        this.sys.game.resume();
+        this._createCloseButton();
+      }, 300);
     };
     const el = document.documentElement;
     const requestFS = el.requestFullscreen
