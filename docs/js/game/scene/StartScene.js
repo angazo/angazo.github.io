@@ -48,9 +48,13 @@ class StartScene extends Phaser.Scene {
           screen.orientation.lock('landscape').catch(() => {});
         } catch (e) {}
       }
+      const createBtn = () => {
+        if (!this._btnBg) this._createCloseButton();
+      };
+      this.sys.game.events.once('resume', createBtn);
       window.setTimeout(() => {
         this.sys.game.resume();
-        this._createCloseButton();
+        createBtn();
       }, 300);
     };
     const el = document.documentElement;
