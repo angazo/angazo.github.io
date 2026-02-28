@@ -1,11 +1,17 @@
 class TapScene extends Phaser.Scene {
   #isMobile = false;
   #tapText  = null;
+  #music    = null;
   constructor() {
     super({ key: 'TapScene' });
   }
+  preload() {
+    this.load.audio('tapBack', 'music/tap-back.mp3');
+  }
   create() {
     this.cameras.main.setBackgroundColor('#000000');
+    this.#music = this.sound.add('tapBack', { loop: true });
+    this.#music.play();
     this.#isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
     this.scale.on('resize', (gameSize) => {
       if (this.#tapText) this.#centerTapText(gameSize.width, gameSize.height);
@@ -56,6 +62,7 @@ class TapScene extends Phaser.Scene {
       const startGame = () => {
         if (started) return;
         started = true;
+        if (this.#music) this.#music.stop();
         this.scene.start('StartScene');
       };
       this.sys.game.events.once('resume', startGame);
