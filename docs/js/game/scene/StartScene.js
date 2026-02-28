@@ -1,81 +1,19 @@
 class StartScene extends Phaser.Scene {
-  #isMobile  = false;
-  #tapText   = null;
   #btnBg     = null;
   #btnLabel  = null;
   #btnR      = 22;
   #btnMargin = 20;
   #btnX      = 0;
   #btnY      = 0;
+  constructor() {
+    super({ key: 'StartScene' });
+  }
   create() {
     this.cameras.main.setBackgroundColor('#000000');
-    this.#isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
     this.scale.on('resize', (gameSize) => {
-      if (this.#tapText) this.#centerTapText(gameSize.width, gameSize.height);
-      if (this.#btnBg)   this.#repositionCloseButton(gameSize.width);
+      if (this.#btnBg) this.#repositionCloseButton(gameSize.width);
     });
-    this.#showTapToStart();
-  }
-  #showTapToStart() {
-    const { width, height } = this.scale;
-    const label = this.#isMobile ? 'TOCA PARA JUGAR' : 'CLICK PARA JUGAR';
-    this.#tapText = this.add.text(0, 0, label, {
-      fontSize: '26px',
-      color: '#ffffff',
-      fontFamily: 'courier, sans-serif',
-      align: 'center'
-    }).setOrigin(0.5).setDepth(5);
-    this.#centerTapText(width, height);
-    this.tweens.add({
-      targets: this.#tapText,
-      alpha: 0,
-      duration: 600,
-      ease: 'Sine.easeInOut',
-      yoyo: true,
-      repeat: -1
-    });
-    const trigger = () => {
-      document.removeEventListener('touchend', trigger);
-      document.removeEventListener('click', trigger);
-      this.#enterFullscreen();
-    };
-    document.addEventListener('touchend', trigger);
-    document.addEventListener('click', trigger);
-  }
-  #centerTapText(w, h) {
-    this.#tapText.setPosition(w / 2, h / 2);
-  }
-  #enterFullscreen() {
-    if (this.#tapText) {
-      this.#tapText.destroy();
-      this.#tapText = null;
-    }
-    const afterFullscreen = () => {
-      if (this.#isMobile) {
-        try {
-          screen.orientation.lock('landscape').catch(() => {});
-        } catch (e) {}
-      }
-      const createBtn = () => {
-        if (!this.#btnBg) this.#createCloseButton();
-      };
-      this.sys.game.events.once('resume', createBtn);
-      window.setTimeout(() => {
-        this.sys.game.resume();
-        createBtn();
-      }, 300);
-    };
-    const el = document.documentElement;
-    const requestFS = el.requestFullscreen
-      || el.webkitRequestFullscreen
-      || el.mozRequestFullScreen;
-    if (requestFS) {
-      requestFS.call(el)
-        .then(() => afterFullscreen())
-        .catch(() => afterFullscreen());
-    } else {
-      afterFullscreen();
-    }
+    this.#createCloseButton();
   }
   #createCloseButton() {
     const { width } = this.scale;
